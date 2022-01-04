@@ -1,0 +1,15 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: git-clone-private-repo-
+spec:
+  serviceAccountName: build-bot
+  pipelineRef:
+    name: git-clone-private-repo
+  workspaces:
+    - name: pipeline-shared-data
+      persistentVolumeClaim:
+        claimName: clone-source
+    - name: ssh-creds
+      secret:
+        secretName: github-ssh-credentials

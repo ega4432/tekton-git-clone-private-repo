@@ -1,0 +1,20 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: cat-readme
+spec:
+  workspaces:
+    - name: source
+  steps:
+    - name: cat
+      image: docker.io/library/busybox:latest
+      script: |
+        #!/bin/sh
+        set -eux
+        cd source
+        if [ -f README.md ]; then
+          cat README.md
+        else
+          echo "Not found README.md"
+          exit 1
+        fi

@@ -1,0 +1,31 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: git-clone-private-repo
+spec:
+  workspaces:
+    - name: pipeline-shared-data
+      description: This workspace stores the cloned repository and is available to all steps
+    - name: ssh-creds
+  tasks:
+    - name: clone-private-repo
+      params:
+        - name: url
+          value: git@github.com:ega4432/private-repository.git
+      taskRef:
+        kind: Task
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: pipeline-shared-data
+        - name: ssh-directory
+          workspace: ssh-creds
+    - name: output
+      runAfter:
+        - clone-private-repo
+      taskRef:
+        kind: Task
+        name: cat-readme
+      workspaces:
+        - name: source
+          workspace: pipeline-shared-data
