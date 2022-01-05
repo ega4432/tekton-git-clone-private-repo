@@ -2,7 +2,7 @@
 
 ## Setup
 
-### Create SSH credential
+### Create a SSH credential
 
 ```sh
 >> ssh-keygen -t rsa
@@ -18,16 +18,24 @@ id_clone_private_repo_rsa.pub
 
 ### Prepare SSH authentication
 
+Paste secret key to the `data.ssh-privatekey` in the `secret.yaml`.
+
 ```sh
 >> oc create -f ./secret.yaml
 ```
+
+Register your public key to GitHub account. To register public key to go to `Settings` of your GitHub account page > `SSH and GPG key` > `New SSH key` and paste your public key.
 
 ### Prepare the cluster
 
 1. Install and create tasks to the OpenShift cluster
 
 ```sh
+# Clone task from tekton hub
 >> oc apply -f https://raw.givthubusercontent.com/tektoncd/catalog/main/task/git-clone/0.5/git-clone.yaml
+
+# Custom task
+# ex) only showing README.md of the private repository
 >> oc apply -f ./task.yaml
 
 >> tkn task list
@@ -36,18 +44,39 @@ cat-readme                            11 seconds ago
 git-clone    These Tasks are Git...   47 seconds ago
 ```
 
-2. Create persistent volume claim
+2. Create a persistent volume claim
 
 ```sh
 >> oc create -f ./pvc.yaml
-
 ```
 
-3. Create service account and secret
-4. Create pipeline
+3. Create a service account and secret for your cluster
+
+```sh
+>> oc create -f ./secret.yaml
+
+>> oc create -f ./sa.yaml
+
+>> oc policy add-role-to-user cluster-admin -z build-bot
+```
+
+4. Create a pipeline
+
+```sh
+>> oc create -f ./pipeline.yaml
+```
 
 ## Usage
 
+Run the pipeline by executing the following command and check the result.
 
+```sh
+# Execute
+>> oc create -f ./pipeline-run.yaml
 
+# Check execution
+>> tkn pr ls
 
+# View log of the latest pipeline run
+>> tkn pr logs -fL
+```
